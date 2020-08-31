@@ -61,7 +61,26 @@ static class Program
 
         notifyIcon.ContextMenuStrip = menu;
 
+
+        LowLevelKeyboardHook kbh = new LowLevelKeyboardHook();
+        kbh.OnKeyPressed += kbh_OnKeyPressed;
+        kbh.OnKeyUnpressed += kbh_OnKeyUnpressed;
+        kbh.HookKeyboard();
+
+
         Application.Run();
+        kbh.UnHookKeyboard();
         await task;
     }
+
+    private static void kbh_OnKeyUnpressed(object? sender, Keys e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private static void kbh_OnKeyPressed(object? sender, Keys e)
+    {
+        throw new NotImplementedException();
+    }
 }
+
