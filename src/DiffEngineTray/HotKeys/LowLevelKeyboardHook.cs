@@ -1,16 +1,15 @@
-﻿
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 public class LowLevelKeyboardHook
 {
-    private const int WH_KEYBOARD_LL = 13;
-    private const int WM_KEYDOWN = 0x0100;
-    private const int WM_SYSKEYDOWN = 0x0104;
-    private const int WM_KEYUP = 0x101;
-    private const int WM_SYSKEYUP = 0x105;
+    const int WH_KEYBOARD_LL = 13;
+    const int WM_KEYDOWN = 0x0100;
+    const int WM_SYSKEYDOWN = 0x0104;
+    const int WM_KEYUP = 0x101;
+    const int WM_SYSKEYUP = 0x105;
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
@@ -50,24 +49,22 @@ public class LowLevelKeyboardHook
 
     private IntPtr SetHook(LowLevelKeyboardProc proc)
     {
-        using (Process curProcess = Process.GetCurrentProcess())
-        using (ProcessModule curModule = curProcess.MainModule)
-        {
-            return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
-        }
+        using Process curProcess = Process.GetCurrentProcess();
+        using ProcessModule curModule = curProcess.MainModule!;
+        return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
     }
 
     private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
         if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN)
         {
-            int vkCode = Marshal.ReadInt32(lParam);
+            var vkCode = Marshal.ReadInt32(lParam);
 
             OnKeyPressed.Invoke(this, ((Keys)vkCode));
         }
         else if(nCode >= 0 && wParam == (IntPtr)WM_KEYUP ||wParam == (IntPtr)WM_SYSKEYUP)
         {
-            int vkCode = Marshal.ReadInt32(lParam);
+            var vkCode = Marshal.ReadInt32(lParam);
 
             OnKeyUnpressed.Invoke(this, ((Keys)vkCode));
         }
